@@ -124,8 +124,6 @@ def basicUnitTest():
     client.connection_made(cTransport)
     server.connection_made(sTransport)
     firstRequest =  packetClass.RequestRecommandation()
-    #firstRequest.request ="request connection"
-    # firstRequest.request = None
     client.Request(firstRequest)
     assert server.serverstatus == 1
     assert client.clientstatus == 1
