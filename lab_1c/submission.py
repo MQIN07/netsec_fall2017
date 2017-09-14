@@ -1,45 +1,10 @@
 from playground.network.packet import PacketType
 import asyncio
-from playground.asyncio_lib.testing import TestLoopEx
+# from playground.asyncio_lib.testing import TestLoopEx
 from playground.network.testing import MockTransportToProtocol
 from playground.network.packet.fieldtypes import UINT32, STRING
-
-class RequestRecommandation(PacketType):
-    DEFINITION_IDENTIFIER = "lab2b.student_m.RequestRecommandation"
-    DEFINITION_VERSION = "1.0"
-    FIELDS = [
-        ("request", STRING)
-    ]
-
-class Question(PacketType):
-    DEFINITION_IDENTIFIER = "lab2b.student_m.Question"
-    DEFINITION_VERSION = "1.0"
-
-    FIELDS = [
-                ("ID", UINT32),
-                ("ask", STRING),
-    ]
-    #self._item = packType
-    #self.transport.write()
-
-class Answer(PacketType):
-    DEFINITION_IDENTIFIER = "lab2b.student_m.Answer"
-    DEFINITION_VERSION = "1.0"
-
-    FIELDS = [
-                ("ID", UINT32),
-                ("answer", STRING),
-    ]
-
-class Result(PacketType):
-    DEFINITION_IDENTIFIER = "lab2b.student_m.Result"
-    DEFINITION_VERSION = "1.0"
-
-    FIELDS = [
-                ("ID", UINT32),
-                ("product", STRING),
-    ]
-
+#from playground.common import logging as p_logging
+import packetClass
 
 class EchoServerProtocol(asyncio.Protocol):
     def __init__(self):
@@ -50,6 +15,7 @@ class EchoServerProtocol(asyncio.Protocol):
         print ("Server is connected to client")
         self.transport = transport
         self.deserializer = PacketType.Deserializer()
+        # self._deserializer = PacketType.Deserializer()
 
     def facetype(self,type):
         if type == "oily":
@@ -59,19 +25,19 @@ class EchoServerProtocol(asyncio.Protocol):
         #def RequestRecommandation()
         self.deserializer.update(data)
         for pkt in self.deserializer.nextPackets():
-            if isinstance(pkt, RequestRecommandation) and self.serverstatus == 0:
+            if isinstance(pkt, packetClass.RequestRecommandation) and self.serverstatus == 0:
                 print("recommandation request received")
-                message = Question()
+                message = packetClass.Question()
                 message.ID = 1
                 message.ask = "what is your skin type"
                 packet1Bytes = message.__serialize__()
                 self.transport.write(packet1Bytes)
                 self.serverstatus +=1
                 break
-            elif isinstance(pkt, Answer) and self.serverstatus ==1:
-                print("Answer packer received")
+            elif isinstance(pkt, packetClass.Answer) and self.serverstatus ==1:
+                print("Answer packet received")
                 mes = self.facetype(pkt.answer)
-                rs = Result()
+                rs = packetClass.Result()
                 rs.ID = 1
                 rs.product = mes
                 self.transport.write(rs.__serialize__())
@@ -79,12 +45,15 @@ class EchoServerProtocol(asyncio.Protocol):
                 break
             else:
                 print("No data received from client")
+                self.transport.close()
+
+    def connection_lost(self, exc):
+        print("connection lost")
 
 class EchoClientProtocol(asyncio.Protocol):
     def __init__(self):
         self.clientstatus = 0
         self.transport = None
-        self.deserializer = PacketType.Deserializer()
 
     def connection_made(self, transport):
         self.transport = transport
@@ -94,42 +63,35 @@ class EchoClientProtocol(asyncio.Protocol):
         # packetBytes = self.packet.__serialize__()
         # self.transport.write(packetBytes)
         print("Client is connected to server")
+        self.deserializer = PacketType.Deserializer()
 
     # def test(self,packet):
     #     if isinstance(RequestRecommandation,packet):
     #
 
     def Request(self,packet):
-        if isinstance(packet,RequestRecommandation):
+        if isinstance(packet,packetClass.RequestRecommandation):
+            # print(packet.__serialize__())
             self.transport.write(packet.__serialize__())
 
         else:
             #print("error")
             raise TypeError("wrong request")
 
-    #def input(self,skintype):
-        #self.skintype = skintype
-
-        #if isinstance(self.skintype, skintype):
-         #   print("Clinique Liquid Facial Soup")
-
-       # self.transport.write(self.skintype)
-
-
-
     def data_received(self, data):
 
         self.deserializer.update(data)
         #clientstatus = 0
-
         #print(data)
         for pkt in self.deserializer.nextPackets():
-            if isinstance(pkt, Question) and self.clientstatus == 0:
+            #print (pkt)
+            if isinstance(pkt, packetClass.Question) and self.clientstatus == 0:
                 self.clientstatus +=1
+                print("Question packet received")
                 break
-
-            elif isinstance(pkt, Result) and self.clientstatus == 1:
+            elif isinstance(pkt, packetClass.Result) and self.clientstatus == 1:
                 self.clientstatus = 2
+                print("Result packet received")
                 break
             #     print(pkt.ask)
             #     self.transport.write(self.packet1Bytes)
@@ -138,6 +100,7 @@ class EchoClientProtocol(asyncio.Protocol):
             #     self.transport.write(self.packet3Bytes)
             else:
                 print("finish")
+                self.transport.close()
 
 
     #method to get skintype
@@ -148,20 +111,26 @@ class EchoClientProtocol(asyncio.Protocol):
         print("connection lost")
 
 def basicUnitTest():
-    asyncio.set_event_loop(TestLoopEx())
-    server = EchoServerProtocol()
+    #asyncio.set_event_loop(TestLoopEx())
+    # server = EchoServerProtocol()
+    # client = EchoClientProtocol()
+    # transportToServer = MockTransportToProtocol(server)
+    # transportToClient = MockTransportToProtocol(client)
+    # server.connection_made(transportToClient)
+    # client.connection_made(transportToServer)
     client = EchoClientProtocol()
-    transportToServer = MockTransportToProtocol(server)
-    transportToClient = MockTransportToProtocol(client)
-    server.connection_made(transportToClient)
-    client.connection_made(transportToServer)
-    firstRequest =  RequestRecommandation()
-    firstRequest.request ="request connection"
+    server = EchoServerProtocol()
+    cTransport, sTransport = MockTransportToProtocol.CreateTransportPair(client, server)
+    client.connection_made(cTransport)
+    server.connection_made(sTransport)
+    firstRequest =  packetClass.RequestRecommandation()
+    #firstRequest.request ="request connection"
+    # firstRequest.request = None
     client.Request(firstRequest)
     assert server.serverstatus == 1
     assert client.clientstatus == 1
     #client.method(firstRequest)
-    OneAnswer = Answer()
+    OneAnswer = packetClass.Answer()
     OneAnswer.answer = "oliy"
     OneAnswer.ID = 1
     client.method(OneAnswer)
@@ -171,6 +140,7 @@ def basicUnitTest():
 
 
 if __name__=="__main__":
+    #p_logging.EnablePresetLogging(p_logging.PRESET_TEST)
     basicUnitTest()
 
 
