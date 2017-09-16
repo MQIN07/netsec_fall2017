@@ -56,8 +56,6 @@ if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     coro = playground.getConnector().create_playground_connection (lambda:EchoClientProtocol(), '20174.1.1.1', 8888)
     loop.run_until_complete(coro)
-    print (coro)
-    print("Client Connected. Starting UI t:{}. p:{}")
     # request = packetClass.RequestRecommandation()
     # client = EchoClientProtocol()
     # client.Request(request)
