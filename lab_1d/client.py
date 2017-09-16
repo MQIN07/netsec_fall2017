@@ -5,11 +5,9 @@ from playground.asyncio_lib.testing import TestLoopEx
 from playground.network.testing import MockTransportToProtocol
 from playground.network.packet.fieldtypes import UINT32, STRING
 import packetClass
-import time
 
 class EchoClientProtocol(asyncio.Protocol):
     def __init__(self):
-        self.loop = loop
         #self.clientstatus = 0
         self.transport = None
         #self.deserializer = PacketType.Deserializer()
@@ -53,13 +51,16 @@ class EchoClientProtocol(asyncio.Protocol):
 
     def connection_lost(self, exc):
         print("connection lost")
-        self.loop.stop()
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
-    # coro = loop.create_connection(lambda: EchoClientProtocol(message, loop),'127.0.0.1', 8888)
-    coro = playground.getConnector().create_playground_connection (lambda: EchoClientProtocol(loop), '20174.1.1.1', 8888)
+    coro = playground.getConnector().create_playground_connection (lambda:EchoClientProtocol(), '20174.1.1.1', 8888)
     loop.run_until_complete(coro)
+    print (coro)
+    print("Client Connected. Starting UI t:{}. p:{}")
+    # request = packetClass.RequestRecommandation()
+    # client = EchoClientProtocol()
+    # client.Request(request)
     loop.run_forever()
     loop.close()
 
