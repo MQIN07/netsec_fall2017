@@ -15,8 +15,9 @@ class PassThrough1(StackingProtocol):
 
 
     def connection_lost(self,exc):
-        self.higherProtocol().connection_lost(exc)
         print("1 connection lost")
+        self.higherProtocol().connection_lost(exc)
+
 
 
     def data_received(self,data):
@@ -34,8 +35,9 @@ class PassThrough2(StackingProtocol):
 
 
     def connection_lost(self,exc):
-        self.higherProtocol().connection_made(exc)
         print("2 connection lost")
+        self.higherProtocol().connection_lost(exc)
+
 
 
     def data_received(self,data):
