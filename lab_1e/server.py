@@ -8,6 +8,7 @@ import packetClass
 import playground
 from playground.network.common import StackingProtocolFactory
 from passthrough import PassThrough1, PassThrough2
+import logging
 
 class EchoServerProtocol(asyncio.Protocol):
     def __init__(self):
@@ -56,6 +57,9 @@ if __name__ == "__main__":
     ptConnector = playground.Connector(protocolStack=f)
     playground.setConnector("passthrough", ptConnector)
     loop = asyncio.get_event_loop()
+    loop.set_debug(enabled=True)
+    logging.getLogger().setLevel(logging.NOTSET)  # this logs *everything*
+    logging.getLogger().addHandler(logging.StreamHandler())
     coro = playground.getConnector('passthrough').create_playground_server(EchoServerProtocol, 8888)
     server = loop.run_until_complete(coro)
     print("Echo Server Started at {}".format(server.sockets[0].gethostname()))
