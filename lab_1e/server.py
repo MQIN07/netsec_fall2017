@@ -7,7 +7,7 @@ from playground.network.packet.fieldtypes import UINT32, STRING
 import packetClass
 import playground
 from playground.network.common import StackingProtocolFactory
-from passthrough import PassThrough1, PassThrough2
+from submission import PassThrough1, PassThrough2
 import logging
 
 class EchoServerProtocol(asyncio.Protocol):
