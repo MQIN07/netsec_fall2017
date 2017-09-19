@@ -1,9 +1,6 @@
 import playground
 from playground.network.common import StackingProtocol,StackingTransport
 
-
-
-
 class PassThrough1(StackingProtocol):
     def __init__(self):
         self.transport = None
@@ -13,12 +10,8 @@ class PassThrough1(StackingProtocol):
         trans = StackingTransport(transport)
         self.higherProtocol().connection_made(trans)
 
-
     def connection_lost(self,exc):
-        print("1 connection lost")
         self.higherProtocol().connection_lost(exc)
-
-
 
     def data_received(self,data):
         self.higherProtocol().data_received(data)
@@ -32,14 +25,10 @@ class PassThrough2(StackingProtocol):
         print("2 connection made")
         trans = StackingTransport(transport)
         self.higherProtocol().connection_made(trans)
-
-
+        
     def connection_lost(self,exc):
-        print("2 connection lost")
         self.higherProtocol().connection_lost(exc)
-
-
-
+        
     def data_received(self,data):
         self.higherProtocol().data_received(data)
         print("2 data received")
