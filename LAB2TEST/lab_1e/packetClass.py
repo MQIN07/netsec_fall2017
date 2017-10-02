@@ -1,3 +1,6 @@
+from playground.network.packet import PacketType
+from playground.network.packet.fieldtypes import UINT32, STRING
+
 from playground.network.packet import *
 from playground.network.packet.fieldtypes import UINT32, UINT8, UINT16, BUFFER
 from playground.network.packet.fieldtypes.attributes import *
